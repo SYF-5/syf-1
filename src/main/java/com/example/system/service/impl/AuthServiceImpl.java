@@ -48,6 +48,8 @@ public class AuthServiceImpl implements AuthService {
         if (existingUser != null) {
             return Result.error("用户名已存在");
         }
+        // 设置默认昵称（使用账号作为昵称）
+        user.setNickname(user.getUsername());
         // 保存用户
         userMapper.insert(user);
         return Result.success("注册成功");
@@ -78,9 +80,9 @@ public class AuthServiceImpl implements AuthService {
         if (!existingUser.getPassword().equals(user.getPassword())) {
             return Result.error("密码错误");
         }
-        // 检查身份是否匹配
-        if (user.getRole() != null && !user.getRole().equals(existingUser.getRole())) {
-            return Result.error("身份不匹配");
+        // 检查用户角色是否有效（0-管理员, 1-学生, 2-商家）
+        if (existingUser.getRole() != 0 && existingUser.getRole() != 1 && existingUser.getRole() != 2) {
+            return Result.error("该账号无法登录");
         }
         // 生成 token（这里简化处理，实际项目中应使用 JWT）
         String token = "token:" + existingUser.getId();
